@@ -18,27 +18,52 @@
 #   this function terminates the program with error code 76.
 # =======================================================
 dot:
-
+    bge x0, a2, exception75
+    bge x0, a3, exception76
+    bge x0, a4, exception76
     # Prologue
+    addi sp, sp, -12
+    sw s0, 0(sp)
+    sw s1, 4(sp)
+    sw s2, 8(sp)
 
+    addi t0, x0, 0
+    addi s0, x0, 0
 
 loop_start:
+    beq t0, a2, loop_end
 
+    slli t1, t0, 2
+    mul t1, t1, a3
+    add t2, a0, t1
+    lw s1, 0(t2)
 
+    slli t1, t0, 2
+    mul t1, t1, a4
+    add t2, a1, t1
+    lw s2, 0(t2)
 
+    mul t1, s2, s1
+    add s0, s0, t1
+    addi t0, t0, 1
 
-
-
-
-
-
-
-
+    jal x0, loop_start
 
 loop_end:
-
+    add a0, x0, s0
 
     # Epilogue
+    lw s0, 0(sp)
+    lw s1, 4(sp)
+    lw s2, 8(sp)
+    addi sp, sp, 12
 
-    
     ret
+
+exception75:
+    addi a1, x0, 75
+    j exit2
+
+exception76:
+    addi a1, x0, 76
+    j exit2
