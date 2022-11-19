@@ -35,7 +35,7 @@ matmul:
     bne a2, a4, exception74
 
     # Prologue
-    addi sp, sp, -40
+    addi sp, sp, -32
     sw ra, 0(sp)
     sw s0, 4(sp)
     sw s1, 8(sp)
@@ -61,14 +61,14 @@ outer_loop_start:
 inner_loop_start:
     beq t1, s5, inner_loop_end
     mul t2, t0, s2
-    addi t4, x0, 4
-    mul t2, t2, t4
+    slli t2, t2, 2
     add a0, s0, t2  # The address of the ith row in matrix0.
-    mul t2, t1, t4
-    add a1, s3, t2  # The address of the jth col in matrix0.
+    slli t2, t1, 2
+    add a1, s3, t2  # The address of the jth col in matrix1.
     add a2, x0, s2
     addi a3, x0, 1
     add a4, x0, s5
+
     addi sp, sp, -8
     sw t0, 0(sp)
     sw t1, 4(sp)
@@ -76,20 +76,22 @@ inner_loop_start:
     lw t0, 0(sp)
     lw t1, 4(sp)
     addi sp, sp, 8
-    addi t4, x0, 4
-    mul t2, t0, s2
-    add t2, t2, t1
-    mul t2, t2, t4
-    add t3, s6, t2  # The address of the (i * a1 + j)th element in matrix_return.
-    sw a0, 0(t3)
-    addi t1, t1, 1
-    jal, x0, inner_loop_start
+    # mul t2, t0, s5
+    # add t2, t2, t1
+    # slli t2, t2, 2
+    # add t3, s6, t2  # The address of the (i * a5 + j)th element in matrix_return.
+    # sw a0, 0(t3)
+    sw a0, 0(s6)
+    addi s6, s6, 4
+    addi t1, t1, 1  # ++j
+    j inner_loop_start
 
 inner_loop_end:
-    addi t0, t0, 1
-    jal, x0, outer_loop_start
+    addi t0, t0, 1  # ++i
+    j outer_loop_start
 
 outer_loop_end:
+
     # Epilogue
     lw ra, 0(sp)
     lw s0, 4(sp)
@@ -99,7 +101,7 @@ outer_loop_end:
     lw s4, 20(sp)
     lw s5, 24(sp)
     lw s6, 28(sp)
-    addi sp, sp, 40
+    addi sp, sp, 32
     
     ret
 
